@@ -15,6 +15,7 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
+		collectionView.backgroundColor = .orange
 		navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addNewPerson))
 	}
 	
@@ -43,6 +44,10 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
 	@objc func addNewPerson() {
 		let picker = UIImagePickerController()
 		picker.allowsEditing = true
+		
+		if UIImagePickerController.isSourceTypeAvailable(.camera) {
+			picker.sourceType = .camera
+		}
 		picker.delegate = self
 		present(picker, animated: true)
 	}
@@ -63,24 +68,44 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
 		collectionView.reloadData()
 		
 		dismiss(animated: true)
+		
+//		let ac = UIAlertController(title: "What do you want to do?", message: nil, preferredStyle: .alert)
+//		ac.addAction(UIAlertAction(title: "Rename", style: .default))
+//		ac.addAction(UIAlertAction(title: "Delete", style: .destructive))
+//		present(ac,animated: true)
 	}
 	
 	override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 		let person = people[indexPath.item]
 		
-		let ac = UIAlertController(title: "Renema person", message: nil, preferredStyle: .alert)
-		ac.addTextField()
+		let ac = UIAlertController(title: "Select an option for you", message: nil, preferredStyle: .actionSheet)
+		ac.addAction(UIAlertAction(title: "Delete", style: .destructive)
+		{ [weak self] _ in
+			if let indexOfPerson = self?.people.firstIndex(of: person) {
+				self?.people.remove(at: indexOfPerson)
+				self?.collectionView.reloadData()
+			}
+		})
+		
+		ac.addAction(UIAlertAction(title: "Edit", style: .default)
+		{ [weak self] _ in
+			let editAc = UIAlertController(title: "Rename", message: nil, preferredStyle: .alert)
+			editAc.addTextField()
+			editAc.addAction(UIAlertAction(title: "Cnacel", style: .cancel))
+			editAc.addAction(UIAlertAction(title: "Ok", style: .default)
+				{ [weak self, weak editAc] _ in
+					guard let newName = editAc?.textFields?[0].text else {return}
+					person.name = newName
+					self?.collectionView.reloadData()
+				})
+			self?.present(editAc, animated: true)
+		})
 		
 		ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-		ac.addAction(UIAlertAction(title: "Ok", style: .default)
-		{ [weak self, weak ac] _ in
-			guard let newName = ac?.textFields?[0].text else {return}
-			person.name = newName
-			self?.collectionView.reloadData()
-		})
 		
 		present(ac, animated: true)
 	}
+	
 	
 	func getDocumentsDirectory() -> URL {
 		let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
