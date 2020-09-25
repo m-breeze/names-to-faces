@@ -68,11 +68,6 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
 		collectionView.reloadData()
 		
 		dismiss(animated: true)
-		
-//		let ac = UIAlertController(title: "What do you want to do?", message: nil, preferredStyle: .alert)
-//		ac.addAction(UIAlertAction(title: "Rename", style: .default))
-//		ac.addAction(UIAlertAction(title: "Delete", style: .destructive))
-//		present(ac,animated: true)
 	}
 	
 	override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
