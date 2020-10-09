@@ -1,8 +1,8 @@
 //
 //  AppDelegate.swift
-//  NamesToFaces
+//  Photofilter
 //
-//  Created by Marina Khort on 14.09.2020.
+//  Created by Marina Khort on 09.10.2020.
 //  Copyright © 2020 Marina Khort. All rights reserved.
 //
 
