@@ -13,6 +13,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 	@IBOutlet var imageView: UIImageView!
 	@IBOutlet var intensity: UISlider!
+	@IBOutlet var filterButton: UIButton!
+	
 	
 	var currentImage: UIImage!
 	var context: CIContext!
@@ -26,7 +28,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		
 		context = CIContext()
 		currentFilter = CIFilter(name: "CISepiaTone")
-		}
+		filterButton.setTitle(currentFilter.name, for: .normal)
+
+	}
 	
 	@objc func importPicture() {
 		let picker = UIImagePickerController()
@@ -41,7 +45,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		
 		//to have a copy of pic what is originally imported
 		currentImage = image
-		
+		filterButton.titleLabel?.text = currentFilter.name
+
 		let beginImage = CIImage(image: currentImage)
 		currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
 		
@@ -68,16 +73,36 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	}
 	
 	@IBAction func save(_ sender: Any) {
+		if let image = imageView.image {
+		UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+		} else {
+			let ac = UIAlertController(title: "Nothing to save", message: "There was no photo", preferredStyle: .alert)
+			ac.addAction(UIAlertAction(title: "Ok", style: .default))
+			present(ac,animated: true)
+		}
 	}
 	
+	
+	@objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+		if let error = error {
+			let ac = UIAlertController(title: "Save error", message: error.localizedDescription, preferredStyle: .alert)
+			ac.addAction(UIAlertAction(title: "Ok", style: .default))
+			present(ac,animated: true)
+		} else {
+			let ac = UIAlertController(title: "Saved!", message: "Your altered image has been saved to your photos", preferredStyle: .alert)
+			ac.addAction(UIAlertAction(title: "Ok", style: .default))
+			present(ac,animated: true)
+		}
+	}
 
 	func setFilter(action: UIAlertAction) {
 		// make sure we have a valid image before continuing
 		guard currentImage != nil else { return }
 		// safely read the alert action's title
 		guard let actionTitle = action.title else { return }
+		filterButton.setTitle(actionTitle, for: .normal)
 		currentFilter = CIFilter(name: actionTitle)
-		
+
 		let beginImage = CIImage(image: currentImage)
 		currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
 		
@@ -107,7 +132,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			imageView.image = processedImage
 		}
 	}
-
-
+ 
 }
 
